@@ -262,6 +262,9 @@ def update_vocab_list(list_id: int, updated_list: VocabListCreate, db: Session =
     vocab_list.name = updated_list.name
     vocab_list.vocab_data = [pair.model_dump() for pair in updated_list.vocab_data]
 
+    audio_path = generate_audio_for_list(vocab_list.vocab_data, list_id)
+    vocab_list.audio_filename = audio_path
+
     db.commit()
     db.refresh(vocab_list)
     return {"message": "Vocab list updated", "id": vocab_list.id}
