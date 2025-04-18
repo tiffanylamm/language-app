@@ -78,14 +78,6 @@ const SavedLists = () => {
                       Your browser does not support the audio element.
                     </audio>
                   )}
-
-                  <ul className="list-disc pl-5">
-                    {list.vocab_data.map((pair, index) => (
-                      <li key={index} className="mb-1">
-                        <strong>{pair.English}</strong> - {pair.Vietnamese}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               ))}
             </div>
