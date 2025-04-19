@@ -72,6 +72,12 @@ const SavedLists = () => {
                   >
                     Edit
                   </button>
+                  <button
+                  onClick={() => navigate(`/scrubber/${list.id}`)}
+                  className='mt-2 text-blue-600 hover:underline'
+                  >
+                    Play Audio
+                  </button>
                   {list.audio_filename && (
                     <audio controls>
                       <source src={`http://127.0.0.1:5000/${list.audio_filename}`} type="audio/mpeg" />

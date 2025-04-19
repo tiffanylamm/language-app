@@ -138,11 +138,14 @@ class VocabListRequest(BaseModel):
     vocab: list[VocabPair]
 
 #generate audio for saved list 
-def generate_audio_for_list(vocab_data, list_id):
+def generate_audio_with_timestamps_for_list(vocab_data, list_id):
     combined_audio = AudioSegment.silent(duration=500)
     temp_folder = "audio"
     os.makedirs(temp_folder, exist_ok=True)
 
+    current_time = 500
+    vocab_list_with_timestamp = []
+ 
     for pair in vocab_data:
         english = pair['English'].strip()
         vietnamese = pair['Vietnamese'].strip()
@@ -160,18 +163,36 @@ def generate_audio_for_list(vocab_data, list_id):
 
         audio_en = AudioSegment.from_mp3(temp_en)
         audio_vi = AudioSegment.from_mp3(temp_vi)
-        combined_audio += audio_en + AudioSegment.silent(duration=1000) + audio_vi + AudioSegment.silent(duration=1000)
+        pause = AudioSegment.silent(duration=1000)
+        combined_audio += audio_en + pause + audio_vi + pause
+
+        duration_en = len(audio_en)
+        duration_vi = len(audio_vi)
+        duration_pause = len(pause)
+
+        vocab_list_with_timestamp.append(
+            {
+                'English': english,
+                'Vietnamese': vietnamese,
+                'start_time': current_time
+            }
+        )
+
+        current_time += duration_en + duration_pause + duration_vi + duration_pause
 
         os.remove(temp_en)
         os.remove(temp_vi)
 
-    final_filename = os.path.join(temp_folder, f"vocab_audio_{list_id}.mp3")
+    final_filename = os.path.join(temp_folder, f"vocab_audio_{uuid.uuid4()}.mp3")
     combined_audio.export(final_filename, format="mp3")
-    return final_filename
+    return [final_filename, vocab_list_with_timestamp]
 
 @app.post('/generate-audio')
 async def generate_audio(data: VocabListRequest):
     vocab_list = data.vocab
+
+    vocab_list_with_timestamps = []
+    current_time = 500
 
     if not vocab_list or not isinstance(vocab_list, list):
         return HTTPException(status_code=400, detail="A list of vocabulary words is required")
@@ -210,14 +231,26 @@ async def generate_audio(data: VocabListRequest):
             vietnamese_audio = AudioSegment.from_mp3(vietnamese_filename)
             pause = AudioSegment.silent(duration=1000) #1 second pause
 
+            duration_en = len(english_audio)
+            duration_vi = len(vietnamese_audio)
+
+            vocab_list_with_timestamps.append({
+                    "English": english_text,
+                    "Vietnamese": vietnamese_text,
+                    "start_time": current_time
+                })
+
+            current_time += duration_en + len(pause) + duration_vi + len(pause)
+
             combined_audio += english_audio + pause + vietnamese_audio + pause
 
         # export final combined audio file 
         final_filename = os.path.join(temp_folder, f"{uuid.uuid4()}_vocab_audio.mp3")
         combined_audio.export(final_filename, format="mp3")
 
-        #return the file as a download
-        return FileResponse(final_filename, media_type="audio/mpeg", filename="vocab_audio.mp3")
+        final_file = FileResponse(final_filename, media_type="audio/mpeg", filename="vocab_audio.mp3")
+        
+        return [final_file, vocab_list_with_timestamps] 
 
     except Exception as e:
         print(f"Error generating audio: {e}")
@@ -239,8 +272,9 @@ def create_vocab_list(vocab_list: VocabListCreate, db: Session = Depends(get_db)
         vocab_data=vocab_data_json,
         user_id=current_user.id
     )
-    audio_path = generate_audio_for_list(db_vocab_list.vocab_data, db_vocab_list.id)
-    db_vocab_list.audio_filename = audio_path
+    audio_path_and_timestamps = generate_audio_with_timestamps_for_list(vocab_data_json, db_vocab_list.id)
+    db_vocab_list.audio_filename = audio_path_and_timestamps[0]
+    db_vocab_list.vocab_data = audio_path_and_timestamps[1]
     db.add(db_vocab_list)
     db.commit()
     db.refresh(db_vocab_list)
@@ -250,6 +284,11 @@ def create_vocab_list(vocab_list: VocabListCreate, db: Session = Depends(get_db)
 def get_vocab_lists(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     vocab_lists = db.query(VocabList).filter(VocabList.user_id == current_user.id).all()
     return vocab_lists
+
+@app.get("/vocab-lists/{list_id}", response_model=VocabListOut)
+def get_vocab_list(list_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    vocab_list = db.query(VocabList).filter(VocabList.id == list_id).first()
+    return vocab_list
 
 @app.put("/vocab-lists/{list_id}")
 def update_vocab_list(list_id: int, updated_list: VocabListCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
@@ -262,8 +301,9 @@ def update_vocab_list(list_id: int, updated_list: VocabListCreate, db: Session =
     vocab_list.name = updated_list.name
     vocab_list.vocab_data = [pair.model_dump() for pair in updated_list.vocab_data]
 
-    audio_path = generate_audio_for_list(vocab_list.vocab_data, list_id)
-    vocab_list.audio_filename = audio_path
+    audio_path_and_timestamps = generate_audio_with_timestamps_for_list(vocab_list.vocab_data, list_id)
+    vocab_list.audio_filename = audio_path_and_timestamps[0]
+    vocab_list.vocab_data = audio_path_and_timestamps[1]
 
     db.commit()
     db.refresh(vocab_list)

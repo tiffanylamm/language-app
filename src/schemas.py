@@ -20,10 +20,16 @@ class VocabListCreate(BaseModel):
     name: str
     vocab_data: List[VocabPair]
 
+class VocabPairWithTime(BaseModel):
+    English: str
+    Vietnamese: str
+    start_time: int #in milliseconds
+
+
 class VocabListOut(BaseModel):
     id: int
     name: str
-    vocab_data: List[VocabPair]
+    vocab_data: List[VocabPairWithTime]
     audio_filename: str
 
 
