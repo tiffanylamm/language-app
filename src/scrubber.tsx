@@ -44,7 +44,7 @@ const Scrubber = () => {
     };
 
     return (
-        <div className='p-4'>
+        <div className='p-4 flex flex-col items-center'>
             <h1 className='text-2xl font-bold mb-4'>Scrubber View</h1>
             {audioUrl && (
                 <audio
@@ -58,33 +58,43 @@ const Scrubber = () => {
                 </audio>
             )}
 
-            <div className='space-y-2'>
-            {vocabList.map((pair, index) => {
-                console.log(`vocab_list pair: ${pair.start_time}`)
-                const next = vocabList[index + 1];
-                const isActive = currentTime >= pair.start_time && (!next || currentTime < next.start_time);
-            
-                return (
-                    <p
-                    key={index}
-                    onClick={() => {
-                        if (
-                            audioRef.current &&
-                            typeof pair.start_time === "number" &&
-                            !isNaN(pair.start_time)
-                        ) {
-                            audioRef.current.currentTime = pair.start_time /1000;
-                        } else {
-                            console.warn("Invalid Start Time:", pair.start_time);
-                        }
-                    }}
-                    className={`cursor-pointer ${isActive? 'text-blue-500 font-bold' : ''}`}
-                    >
-                        {pair.English} - {pair.Vietnamese}
-                    </p>
-                );
-            })}
-            </div>
+<div className='space-y-2'>
+  {vocabList.map((pair, index) => {
+    const next = vocabList[index + 1];
+    const isActive =
+      currentTime >= pair.start_time && (!next || currentTime < next.start_time);
+
+    return (
+      <div
+        key={index}
+        onClick={() => {
+          if (
+            audioRef.current &&
+            typeof pair.start_time === "number" &&
+            !isNaN(pair.start_time)
+          ) {
+            audioRef.current.currentTime = pair.start_time / 1000;
+          } else {
+            console.warn("Invalid Start Time:", pair.start_time);
+          }
+        }}
+        className={`cursor-pointer flex justify-center items-center ${
+          isActive ? "text-blue-500 font-bold" : ""
+        }`}
+      >
+        {/* English - left aligned */}
+        <div className="w-1/2 text-right pr-4">{pair.English}</div>
+
+        {/* Spacer in center */}
+        <div></div>
+
+        {/* Vietnamese - right aligned */}
+        <div className="w-1/2 text-left pl-4">{pair.Vietnamese}</div>
+      </div>
+    );
+  })}
+</div>
+
         </div>
     );
     

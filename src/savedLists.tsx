@@ -63,30 +63,30 @@ const SavedLists = () => {
             <p>No saved vocab lists found.</p>
           ) : (
             <div className="w-full max-w-4xl space-y-4">
-              {savedLists.map((list) => (
-                <div key={list.id} className="bg-white p-4 rounded shadow">
-                  <h2 className="text-xl font-semibold mb-2">{list.name}</h2>
-                  <button
-                  onClick={() => handleEdit(list)}
-                  className='mt-2 text-blue-600 hover:underline'
-                  >
-                    Edit
-                  </button>
-                  <button
-                  onClick={() => navigate(`/scrubber/${list.id}`)}
-                  className='mt-2 text-blue-600 hover:underline'
-                  >
-                    Play Audio
-                  </button>
-                  {list.audio_filename && (
-                    <audio controls>
-                      <source src={`http://127.0.0.1:5000/${list.audio_filename}`} type="audio/mpeg" />
-                      Your browser does not support the audio element.
-                    </audio>
-                  )}
+            {savedLists.map((list) => (
+              <div key={list.id} className="bg-white p-4 rounded shadow">
+                {/* Flex row: name on left, buttons on right */}
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl">{list.name}</h2>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleEdit(list)}
+                      className="text-black-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => navigate(`/scrubber/${list.id}`)}
+                      className="text-black-600 hover:underline"
+                    >
+                      Play Audio
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
+
           )}
         </div>
       );

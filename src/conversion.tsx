@@ -201,7 +201,7 @@ const handleDeleteRow = (index: number) => {
 
     <div className='mb-4'>
       {currentUser ? (
-        <p className='text-green-600'>Logged in as: {currentUser}</p>
+        <p className='text-black-600'>Logged in as: {currentUser}</p>
       ) : (
         <p className='text-red-600'>Not logged in</p>
       )}
@@ -263,12 +263,12 @@ const handleDeleteRow = (index: number) => {
 <div className='flex gap-2'>
     <button 
         onClick={addRow}
-        className='px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600'
+        className='px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600'
     >
         Add Row
     </button>
 
-    <button
+    {/* <button
         onClick={handleSubmit}
         disabled={vocabList.length === 0 || isLoading}
         className={`px-4 py-2 rounded text-white ${
@@ -276,12 +276,12 @@ const handleDeleteRow = (index: number) => {
         }`}
       >
         {isLoading ? 'Generating Audio...' : 'Generate Audio'}
-    </button>
+    </button> */}
 
     <button
       onClick={handleSaveList}
       disabled={vocabList.length === 0 || !listName}
-      className='px-4 py-2 rounded bg-purple-500 text-white hover:bg-purple-600 mb-4'>
+      className='px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600'>
         Save List
       </button>
 </div>
