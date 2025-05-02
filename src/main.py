@@ -20,7 +20,7 @@ import uuid  # For unique filenames to avoid overwrites
 
 SECRET_KEY = "mysecretkey" #use env variable in prod
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 
 app = FastAPI()
 # router = APIRouter()

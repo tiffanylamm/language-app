@@ -29,7 +29,7 @@ const Login = () => {
             // localStorage.setItem('token', token);
             console.log('Token:', token)
             alert("Logged in!");
-            navigate('/conversion')
+            navigate('/saved-lists')
         } catch (error) {
             alert("Login failed!");
         }

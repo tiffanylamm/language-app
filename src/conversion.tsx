@@ -5,7 +5,7 @@ import axios from 'axios';
 import Papa from 'papaparse';
 import { AuthContext } from './contexts/AuthContext';
 import { jwtDecode } from 'jwt-decode';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // describes shape of single row in csv(typescript expectation)
 interface VocabPair {
@@ -19,7 +19,8 @@ interface DecodedToken {
 }
 
 const Conversion = () => {
-  const location = useLocation()
+  const location = useLocation();
+  const navigate = useNavigate();
   const listToEdit = location.state?.listToEdit;
   const { token } = useContext(AuthContext)!;
   // state variable that holds the file. setFile function. State can be either file or null
@@ -169,6 +170,7 @@ const handleDeleteRow = (index: number) => {
         );
         alert('Vocab list updated!');
         console.log(response.data);
+        navigate("/saved-lists");
       } else {
         const response = await axios.post (
           url,
@@ -183,6 +185,7 @@ const handleDeleteRow = (index: number) => {
           }
         );
         alert('Vocab List created!');
+        navigate("/saved-lists");
         console.log(response.data);
       }
     } catch (error) {
